@@ -1,6 +1,7 @@
 #!/bin/bash
 export DEBIAN_FRONTEND=noninteractive
 echo "Running operating system updates..."
+sudo apt-add-repository ppa:zabuch/ppa
 apt-get update
 apt-get -y upgrade
 echo "Installing required packages..."
@@ -20,7 +21,16 @@ apt-get -y install \
 	php5-mcrypt \
 	php-pear \
 	php5-xsl \
-	git
+	git \
+	moosh \
+	mimetex \
+	texlive-base \
+	texlive-extra-utils \
+	imagemagick \
+	texi2html \
+	texinfo \
+	gnuplot \
+	clisp
 echo "Configuring Apache..."
 rm -rf /etc/apache2/sites-enabled
 rm -rf /etc/apache2/sites-available
@@ -58,6 +68,20 @@ IncludeOptional conf-enabled/*.conf
 	</Directory>
 </VirtualHost>
 EOF
+
+cd /tmp
+echo "set up stack latest code"
+git clone https://github.com/aharjula/moodle-qtype_stack /var/www/moodle/html/question/type/stack
+echo "download and build maxima 5.36.0 source code"
+wget -q -O maxima_source.tar.gz http://sourceforge.net/projects/maxima/files/Maxima-source/5.36.0-source/maxima-5.36.0.tar.gz/download
+tar zxvf maxima_source.tar.gz
+cd maxima-5.36.0
+./configure
+make --quiet
+make install --quiet
+sudo updatedb
+echo "completed building maxima and stack"
+
 echo "Creating database..."
 PGHBAFILE=$(find /etc/postgresql -name pg_hba.conf | head -n 1)
 cat <<EOF > "${PGHBAFILE}"
