@@ -71,7 +71,7 @@ EOF
 
 cd /tmp
 echo "set up stack latest code"
-git clone https://github.com/aharjula/moodle-qtype_stack /var/www/moodle/html/question/type/stack
+git clone https://github.com/maths/moodle-qtype_stack/ /var/www/moodle/html/question/type/stack
 echo "download and build maxima 5.36.0 source code"
 wget -q -O maxima_source.tar.gz http://sourceforge.net/projects/maxima/files/Maxima-source/5.36.0-source/maxima-5.36.0.tar.gz/download
 tar zxvf maxima_source.tar.gz
