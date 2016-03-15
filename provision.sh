@@ -30,7 +30,9 @@ apt-get -y install \
 	texi2html \
 	texinfo \
 	gnuplot \
-	clisp
+	clisp \
+	unzip \
+	npm
 echo "Configuring Apache..."
 rm -rf /etc/apache2/sites-enabled
 rm -rf /etc/apache2/sites-available
@@ -68,20 +70,6 @@ IncludeOptional conf-enabled/*.conf
 	</Directory>
 </VirtualHost>
 EOF
-
-cd /tmp
-echo "set up stack latest code"
-git clone https://github.com/maths/moodle-qtype_stack/ /var/www/moodle/html/question/type/stack
-echo "download and build maxima 5.36.0 source code"
-wget -q -O maxima_source.tar.gz http://sourceforge.net/projects/maxima/files/Maxima-source/5.36.0-source/maxima-5.36.0.tar.gz/download
-tar zxvf maxima_source.tar.gz
-cd maxima-5.36.0
-./configure
-make --quiet
-make install --quiet
-sudo updatedb
-echo "completed building maxima and stack"
-
 echo "Creating database..."
 PGHBAFILE=$(find /etc/postgresql -name pg_hba.conf | head -n 1)
 cat <<EOF > "${PGHBAFILE}"
@@ -98,20 +86,27 @@ sudo -u postgres createdb -E UTF-8 -O moodle -U postgres moodle
 echo "Creating Moodle directories..."
 mkdir -p /var/www/moodle/html
 mkdir -p /var/www/moodle/data
-mkdir -p /var/www/moodle/check
-cd /var/www/moodle/check
-echo "Retrieving latest stable Moodle version..."
-git init > /dev/null
-git remote add origin https://github.com/moodle/moodle.git
-LATEST_VERSION=$(git ls-remote --tags | awk '{print $2}' | grep -v '}$' | grep -v 'beta' | grep -v 'rc' | sed 's/refs\/tags\/v//' | sort -t. -k 1,1n -k 2,2n -k 3,3n | tail -n1)
-cd /var/www/moodle
-rm -rf /var/www/moodle/check
+echo "download and build maxima 5.36.0 source code"
+wget -q -O maxima_source.tar.gz http://sourceforge.net/projects/maxima/files/Maxima-source/5.36.0-source/maxima-5.36.0.tar.gz/download
+tar zxvf maxima_source.tar.gz
+cd maxima-5.36.0
+./configure --with-clisp
+make --silent
+make install --silent
+sudo updatedb
+echo "completed building maxima"
 cd /var/www/moodle/html
-echo "Retrieving Moodle version ${LATEST_VERSION}..."
-curl -s -o moodle.tgz "https://codeload.github.com/moodle/moodle/tar.gz/v${LATEST_VERSION}"
-tar --strip-components 1 -zxf moodle.tgz
-rm -f moodle.tgz
+echo "Retrieving latest stable Moodle version..."
+sudo git clone git://git.moodle.org/moodle.git /var/www/moodle/html
+sudo git branch --track MOODLE_29_STABLE origin/MOODLE_29_STABLE
+sudo git pull
+sudo git checkout MOODLE_29_STABLE
+git clone https://github.com/maths/moodle-qtype_stack /var/www/moodle/html/question/type/stack
+git clone https://github.com/maths/moodle-qbehaviour_adaptivemultipart /var/www/moodle/html/question/behaviour/adaptivemultipart 
+git clone https://github.com/maths/moodle-qbehaviour_dfcbmexplicitvaildate /var/www/moodle/html/question/behaviour/dfcbmexplicitvaildate
+git clone https://github.com/maths/moodle-qbehaviour_dfexplicitvaildate /var/www/moodle/html/question/behaviour/dfexplicitvaildate
 echo "Installing Moodle..."
+cd /var/www/moodle/html
 php admin/cli/install.php \
 	--lang="en" \
 	--wwwroot="http://moodle.local" \
@@ -127,6 +122,10 @@ php admin/cli/install.php \
 chown www-data:www-data -R /var/www/moodle
 echo "Restarting Apache..."
 service apache2 restart
+echo "install node.js for theme development"
+sudo npm install -g grunt-cli
+cd /var/www/moodle/theme/bootstrapbase/less
+sudo npm install
 cat <<EOF
 Service installed at http://moodle.local/
 
@@ -136,6 +135,8 @@ moodle.local points to 192.168.33.10
 
 username: admin
 password: Admin1!
+
+ssh to the guest machine using vagrant ssh
 
 EOF
 cat <<EOF > /etc/cron.d/moodle
