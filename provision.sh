@@ -98,9 +98,9 @@ echo "completed building maxima"
 cd /var/www/moodle/html
 echo "Retrieving latest stable Moodle version..."
 sudo git clone git://git.moodle.org/moodle.git /var/www/moodle/html
-sudo git branch --track MOODLE_29_STABLE origin/MOODLE_29_STABLE
+sudo git branch --track MOODLE_30_STABLE origin/MOODLE_30_STABLE
 sudo git pull
-sudo git checkout MOODLE_29_STABLE
+sudo git checkout MOODLE_30_STABLE
 git clone https://github.com/maths/moodle-qtype_stack /var/www/moodle/html/question/type/stack
 git clone https://github.com/maths/moodle-qbehaviour_adaptivemultipart /var/www/moodle/html/question/behaviour/adaptivemultipart 
 git clone https://github.com/maths/moodle-qbehaviour_dfcbmexplicitvaildate /var/www/moodle/html/question/behaviour/dfcbmexplicitvaildate
