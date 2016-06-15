@@ -8,9 +8,8 @@ echo "Installing required packages..."
 apt-get -y install \
 	apache2 \
 	libapache2-mod-php5 \
-	postgresql \
-	postgresql-client \
-	php5-pgsql \
+	mysql-server \
+	php5-mysql \
 	php5-intl \
 	php5-curl \
 	php5-xmlrpc \
@@ -71,18 +70,15 @@ IncludeOptional conf-enabled/*.conf
 </VirtualHost>
 EOF
 echo "Creating database..."
-PGHBAFILE=$(find /etc/postgresql -name pg_hba.conf | head -n 1)
-cat <<EOF > "${PGHBAFILE}"
-local   all             postgres                                peer
-# TYPE  DATABASE        USER            ADDRESS                 METHOD
-local   all             all                                     peer
-host    moodle          moodle          127.0.0.1/32            trust
-host    all             all             127.0.0.1/32            md5
-host    all             all             ::1/128                 md5
+cat <<EOF > /root/run_mysql.sql
+CREATE DATABASE moodle DEFAULT CHARACTER SET UTF8 COLLATE utf8_unicode_ci;
+CREATE USER 'moodleuser'@'localhost' IDENTIFIED BY 'Admin1!';
+GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,CREATE TEMPORARY TABLES,DROP,INDEX,ALTER ON moodle.* TO 'moodleuser'@'localhost' IDENTIFIED BY 'Admin1!';
 EOF
-service postgresql restart
-sudo -u postgres createuser -SRDU postgres moodle
-sudo -u postgres createdb -E UTF-8 -O moodle -U postgres moodle
+mysql -u root information_schema < /root/run_mysql.sql
+mysql -u root moodle < /var/www/moodle/html/moodle_2016_06_02.sql
+php /var/www/moodle/html/admin/cli/mysql_compressed_rows.php --fix
+service myesql restart
 echo "Creating Moodle directories..."
 mkdir -p /var/www/moodle/html
 mkdir -p /var/www/moodle/data
@@ -98,9 +94,9 @@ echo "completed building maxima"
 cd /var/www/moodle/html
 echo "Retrieving latest stable Moodle version..."
 sudo git clone git://git.moodle.org/moodle.git /var/www/moodle/html
-sudo git branch --track MOODLE_30_STABLE origin/MOODLE_30_STABLE
+sudo git branch --track MOODLE_31_STABLE origin/MOODLE_31_STABLE
 sudo git pull
-sudo git checkout MOODLE_30_STABLE
+sudo git checkout MOODLE_31_STABLE
 git clone https://github.com/maths/moodle-qtype_stack /var/www/moodle/html/question/type/stack
 git clone https://github.com/maths/moodle-qbehaviour_adaptivemultipart /var/www/moodle/html/question/behaviour/adaptivemultipart 
 git clone https://github.com/maths/moodle-qbehaviour_dfcbmexplicitvaildate /var/www/moodle/html/question/behaviour/dfcbmexplicitvaildate
