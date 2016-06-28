@@ -1,0 +1,7 @@
+load("maximalocal.mac");
+load("/var/www/html/moodle/question/type/stack/stack/maxima/stackmaxima.mac");
+load(stats);
+load(distrib);
+load(descriptive);
+:lisp (ext:saveinitmem "maxima-optimised.mem" :init-function #'user::run)
+quit();
