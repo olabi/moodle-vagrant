@@ -82,10 +82,10 @@ service myesql restart
 echo "Creating Moodle directories..."
 mkdir -p /var/www/moodle/html
 mkdir -p /var/www/moodle/data
-echo "download and build maxima 5.36.1 source code"
-wget -q -O maxima_source.tar.gz http://sourceforge.net/projects/maxima/files/Maxima-source/5.36.1-source/maxima-5.36.1.tar.gz/download
+echo "download and build maxima 5.38.1 source code"
+wget -q -O maxima_source.tar.gz http://sourceforge.net/projects/maxima/files/Maxima-source/5.38.1-source/maxima-5.38.1.tar.gz/download
 tar zxvf maxima_source.tar.gz
-cd maxima-5.36.1
+cd maxima-5.38.1
 ./configure --with-clisp
 make --silent
 make install --silent
