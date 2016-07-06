@@ -78,7 +78,7 @@ EOF
 mysql -u root information_schema < /root/run_mysql.sql
 mysql -u root moodle < /var/www/moodle/html/moodle_2016_06_02.sql
 php /var/www/moodle/html/admin/cli/mysql_compressed_rows.php --fix
-service myesql restart
+service mysql restart
 echo "Creating Moodle directories..."
 mkdir -p /var/www/moodle/html
 mkdir -p /var/www/moodle/data
@@ -93,7 +93,7 @@ sudo updatedb
 echo "completed building maxima"
 cd /var/www/moodle/html
 echo "Retrieving latest stable Moodle version..."
-sudo git clone git://git.moodle.org/moodle.git /var/www/moodle/html
+sudo git clone https://github.com/whanrott/moodle.git /var/www/moodle/html
 sudo git branch --track MOODLE_31_STABLE origin/MOODLE_31_STABLE
 sudo git pull
 sudo git checkout MOODLE_31_STABLE

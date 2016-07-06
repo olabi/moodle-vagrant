@@ -12,7 +12,7 @@ Usage instructions:
 
 - Clone moodle-vagrant:
 
-git clone https://github.com/digitalsparky/moodle-vagrant.git
+git clone https://github.com/whanrott/moodle-vagrant.git
 
 - Change to moodle-vagrant directory
 - Execute vagrant:
